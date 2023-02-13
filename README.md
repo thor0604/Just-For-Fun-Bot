@@ -41,6 +41,7 @@ Fifth, I tried to integrate a simple game into this bot. I remembered one of the
 Type *!startgame* to play this game!
 
 g. Music
+
 Finally, since most of the music bot has been banned on Discord, I told myself to develop one myself to apply everything I've learnt. It wasn't easy and there're many things that can be improved. But here's what it looks like:) 
 User can add any songs they want in queue by typing */add [query]* and this bot uses Youtubev3 API from Google to search the video online. Similarly, one has to create an account with Google in order to generate an API key which has to be include in *data.py*. This key can be similar to the one used in image finder. It then returns a list of results and we will be taking the first in the list.
 User can then play the songs in queue with */play* command. The bot will then download the music from the url and convert it into discord readable format using ffmpeg. By default, I've named it *audio.mp3* and it will be replaced each and everytime a new song is downloaded. Check out othe functions using *!help* command.
