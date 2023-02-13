@@ -1,4 +1,4 @@
-### Bot Just For Fun
+# Bot Just For Fun
 This bot contains several random functions. I've developed this bot to learn how APIs and asynchonise programming works. This bot is strictly for personal use only and several improvements can be made.
 
 ## Instruction
