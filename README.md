@@ -48,3 +48,6 @@ User can then play the songs in queue with */play* command. The bot will then do
 
 ## To be improved
 - This bot contains global variables that stores data such as list of songs on queue and game target which is not ideal if it's deployed in several discord servers.
+
+## Notes
+Feel free to use these codes to learn or for reference!
