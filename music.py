@@ -15,7 +15,6 @@ IS_PAUSED = False
 VOICE_CHANNEL = None
 
 def search_youtube(query):
-    """search title and url from query"""
     api_service_name = "youtube"
     api_version = "v3"
     youtube = googleapiclient.discovery.build(
@@ -41,6 +40,8 @@ async def handle_music_request(message, user_message):
         await pause_music(message)
     elif p_message[:4] == '/add':
         await add_music(message, p_message[4:])
+    elif p_message[:7] == '/remove':
+        await remove_music(message, p_message[7:])
     elif p_message == '/skip':
         await skip_music(message)
     elif p_message == '/queue':
@@ -58,17 +59,19 @@ async def play_music(message):
     if VOICE_CHANNEL is None or VOICE_CHANNEL != message.author.voice.channel: # connect to user's voice channel
         VOICE_CHANNEL = message.author.voice.channel # Message => Author(Member) => Voice(VoiceState) => Channel(VoiceChannel)
         await VOICE_CHANNEL.connect() # VoiceChannel => connect()
-
     if IS_PAUSED: # music was paused
         IS_PAUSED = False
         IS_PLAYING = True
         message.guild.voice_client.resume()
-        message.channel.send("`Resuming music!`")
-    elif len(MUSIC_QUEUE) == 0 and not IS_PAUSED: # no more music in queue
-        IS_PLAYING = False
-        await message.channel.send("`No music in queue!`")
+        await message.channel.send("`Resuming music!`")
+        return
     elif IS_PLAYING: # music already playing in channel
         await message.channel.send("`Music is already playing in voice channel!`")
+        return
+    elif len(MUSIC_QUEUE) == 0: # no more music in queue
+        IS_PLAYING = False
+        await message.channel.send("`No music in queue!`")
+        return
 
     url_song_to_play = MUSIC_QUEUE[0][1]
     IS_PLAYING = True
@@ -84,6 +87,8 @@ async def play_music(message):
 
 def play_next():
     global IS_PLAYING, VOICE_CHANNEL
+    if not IS_PLAYING:
+        return
     if len(MUSIC_QUEUE) == 0:
         IS_PLAYING = False
         return
@@ -95,12 +100,25 @@ def play_next():
 
     audio = "audio.mp3"
     source = discord.FFmpegPCMAudio(audio)
+    IS_PLAYING = True
     VOICE_CHANNEL.guild.voice_client.play(source, after=lambda e: play_next())
 
 async def clear_list(message):
     global MUSIC_QUEUE
     MUSIC_QUEUE = []
-    await message.channel.send("`Cleared list`")  
+    await message.channel.send("`Cleared list`")
+
+async def remove_music(message, index):
+    global MUSIC_QUEUE
+    max_length = len(MUSIC_QUEUE) - 1
+    try:
+        index = int(index)
+        assert index <= max_length
+    except:
+        await message.channel.send("`Please insert a valid integer!`")
+        return
+    deleted_item =  MUSIC_QUEUE.pop(index)
+    await message.channel.send(f"`Removed {deleted_item[0]} from list!`")
 
 async def pause_music(message):
     global IS_PAUSED, IS_PLAYING
@@ -110,6 +128,7 @@ async def pause_music(message):
     IS_PAUSED = True
     IS_PLAYING = False
     message.guild.voice_client.pause()
+    await message.channel.send("`Music paused!`")
 
 async def skip_music(message):
     global IS_PLAYING
@@ -118,14 +137,21 @@ async def skip_music(message):
         return
     IS_PLAYING = False
     message.guild.voice_client.pause()
-    play_next()
+    await message.channel.send("`Music skipped!`")
 
 async def leave_channel(message):
+    global IS_PLAYING, VOICE_CHANNEL
     voice_client = message.guild.voice_client
     if voice_client.is_connected(): # Message => Guild(server) => voice_client(VoiceProtocol)
+        message.guild.voice_client.pause()
+        IS_PLAYING = False
+        VOICE_CHANNEL = None
         await voice_client.disconnect()
+        await message.channel.send("`Leaved voice channel!`")
+        return 
     else:
         await message.send("The bot is not connected to a voice channel.")
+        return
 
 async def add_music(message, query):
     if len(query) <= 1:
