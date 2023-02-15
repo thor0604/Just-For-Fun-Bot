@@ -20,6 +20,7 @@ HELP = (
     "`!weatherGrenoble: to get weather forecast for Grenoble`\n"
     "`!startgame: to start a cumber comparison game`\n"
     "`/add [music]: to add music into queue`\n"
+    "`/remove [index]: to remove song from queue`\n"
     "`/play: to play music in voice channel`\n"
     "`/pause: to pause music`\n"
     "`/queue: to see list of songs in queue`\n"
